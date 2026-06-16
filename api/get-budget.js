@@ -11,18 +11,24 @@ export default async function handler(req, res) {
     });
 
     const totals = {};
+    const categoriesSet = new Set();
 
     response.results.forEach(page => {
       const category = page.properties.Category?.select?.name;
-      const estimated =
-        page.properties["Estimated Cost"]?.number || 0;
+      const estimated = page.properties["Estimated Cost"]?.number || 0;
 
       if (!category) return;
 
+      categoriesSet.add(category);
       totals[category] = (totals[category] || 0) + estimated;
     });
 
-    res.status(200).json({ totals });
+    const categories = Array.from(categoriesSet);
+
+    res.status(200).json({
+      totals,
+      categories
+    });
 
   } catch (err) {
     res.status(500).json({ error: err.message });
