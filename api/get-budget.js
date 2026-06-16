@@ -29,8 +29,8 @@ export default async function handler(req, res) {
       totals[category] = (totals[category] || 0) + value;
     });
 
-    res.status(200).json({ totals });
+    return res.status(200).json({ totals });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    return res.status(500).json({ error: err.message });
   }
 }
