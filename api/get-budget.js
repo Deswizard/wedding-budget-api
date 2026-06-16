@@ -10,16 +10,20 @@ export default async function handler(req, res) {
       database_id: process.env.NOTION_DATABASE_ID,
     });
 
-    const page = response.results[0];
+    const totals = {};
 
-    res.status(200).json({
-      propertyKeys: Object.keys(page.properties),
-      rawProperties: page.properties
+    response.results.forEach(page => {
+      const category = page.properties.Category?.select?.name;
+      const value = page.properties["Estimated Cost"]?.number || 0;
+
+      if (!category) return;
+
+      totals[category] = (totals[category] || 0) + value;
     });
+
+    res.status(200).json({ totals });
 
   } catch (err) {
-    res.status(500).json({
-      error: err.message
-    });
+    res.status(500).json({ error: err.message });
   }
 }
