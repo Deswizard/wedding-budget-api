@@ -1,20 +1,34 @@
 import { Client } from "@notionhq/client";
 
 export default async function handler(req, res) {
+  res.setHeader("Access-Control-Allow-Origin", "https://deswizard.github.io");
+  res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+
+  if (req.method === "OPTIONS") {
+    return res.status(200).end();
+  }
+
   try {
     const notion = new Client({
       auth: process.env.NOTION_TOKEN,
     });
+
     const response = await notion.databases.query({
       database_id: process.env.NOTION_DATABASE_ID,
     });
+
     const totals = {};
+
     response.results.forEach(page => {
       const category = page.properties.Category?.select?.name;
       const value = page.properties["Estimated Cost"]?.number || 0;
+
       if (!category) return;
+
       totals[category] = (totals[category] || 0) + value;
     });
+
     res.status(200).json({ totals });
   } catch (err) {
     res.status(500).json({ error: err.message });
