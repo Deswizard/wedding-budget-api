@@ -4,6 +4,37 @@ export default async function handler(req, res) {
       database_id: process.env.NOTION_DATABASE_ID,
     });
 
+    const map = {};
+
+    response.results.forEach(page => {
+      const category =
+        page.properties?.Category?.select?.name || "Uncategorized";
+
+      const value =
+        page.properties?.["Estimated Cost"]?.number || 0;
+
+      if (!map[category]) map[category] = 0;
+      map[category] += value;
+    });
+
+    const chartData = Object.entries(map).map(([category, value]) => ({
+      category,
+      value
+    }));
+
+    res.status(200).json({
+      chartData
+    });
+
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+}export default async function handler(req, res) {
+  try {
+    const response = await notion.databases.query({
+      database_id: process.env.NOTION_DATABASE_ID,
+    });
+
     const totals = {};
     const categoriesSet = new Set();
 
