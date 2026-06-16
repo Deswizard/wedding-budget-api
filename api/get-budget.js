@@ -4,6 +4,28 @@ export default async function handler(req, res) {
       database_id: process.env.NOTION_DATABASE_ID,
     });
 
+    const debug = response.results.map(page => {
+      return {
+        properties: Object.keys(page.properties),
+        categoryRaw: page.properties.Category,
+        estimatedRaw: page.properties["Estimated Cost"]
+      };
+    });
+
+    res.status(200).json({
+      count: response.results.length,
+      sample: debug.slice(0, 3)
+    });
+
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+}export default async function handler(req, res) {
+  try {
+    const response = await notion.databases.query({
+      database_id: process.env.NOTION_DATABASE_ID,
+    });
+
     const map = {};
 
     response.results.forEach(page => {
